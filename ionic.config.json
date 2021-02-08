@@ -1,5 +1,7 @@
 {
   "name": "search",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }

@@ -13,8 +13,14 @@
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <ion-button (click)="check()">現在地から検索</ion-button>
+  
+  <div #map id="map"></div>
+  <div *ngIf="selectedShop">
+      <ion-item>店舗ID:{{ selectedShop.id }}</ion-item>
+      <ion-item>店舗名:{{ selectedShop.name }}</ion-item>
+      <ion-item>店舗住所:{{ selectedShop.address }}</ion-item>
+      <ion-item>電話番号:{{ selectedShop.tel }}</ion-item>
   </div>
+
 </ion-content>
