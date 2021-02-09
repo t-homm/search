@@ -14,7 +14,19 @@
   </ion-header>
 
   <ion-button (click)="check()">現在地から検索</ion-button>
-  
+  <form #searchForm="ngForm" (ngSubmit)="search(searchForm)">
+    <ion-list lines="full">
+    <ion-item>
+        <ion-label>店舗名から検索</ion-label>
+        <ion-input placeholder="幕張" name="searchShopName" [(ngModel)]="searchShopName"></ion-input>
+    </ion-item>
+    </ion-list>
+    <ion-button type="submit">検索</ion-button>
+</form>
+<div *ngFor="let selectedShop of selectedShops">
+      <ion-item>店舗名:{{ selectedShop.name }}</ion-item>
+</div>
+
   <div #map id="map"></div>
   <div *ngIf="selectedShop">
       <ion-item>店舗ID:{{ selectedShop.id }}</ion-item>

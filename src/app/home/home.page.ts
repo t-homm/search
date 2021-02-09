@@ -12,9 +12,11 @@ declare var google: any;
 })
 export class HomePage implements OnInit{
     @ViewChild('map', { static: true }) mapElement: ElementRef;
+    searchShopName:string = "";
 
     shops:Shop[];
     selectedShop:Shop;
+    selectedShops:Shop[];
 
     latitude: number = 35.651509516118466;
     longitude: number = 140.03762950048184;
@@ -97,6 +99,36 @@ export class HomePage implements OnInit{
   async check(){
     await this.getLocation();
     this.loadMap();
+  }
+
+  search(searchForm){
+      //初期化
+      this.selectedShops = [];
+      var cnt = 0;
+      for (let i = 0; i < this.shops.length; i++) {
+          var string = this.shops[i].name;
+          var pattern = searchForm.value.searchShopName;
+          if(string.indexOf(pattern) > -1){
+
+              if(cnt === 0 ){
+                  this.latitude = this.shops[i].latitude;
+                  this.longitude = this.shops[i].longitude;
+                  this.loadMap();
+              }
+
+              //一致したら配列に入れる
+              this.selectedShops[cnt] = {
+                id:this.shops[i].id,
+                name:this.shops[i].name,
+                address:this.shops[i].address,
+                tel:this.shops[i].tel,
+                latitude:this.shops[i].latitude,
+                longitude:this.shops[i].longitude
+              };
+              cnt++;
+          }
+      }
+      console.log(this.selectedShops);
   }
 }
 class Shop{
