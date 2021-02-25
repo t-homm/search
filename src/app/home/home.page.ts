@@ -1,5 +1,6 @@
 import { Component,ViewChild,ElementRef,OnInit } from '@angular/core';
 import { Plugins } from '@capacitor/core';
+import { LocationService } from '../services/location.service';
 
 const { Geolocation } = Plugins;
 
@@ -12,8 +13,8 @@ declare var google: any;
 })
 export class HomePage implements OnInit{
     @ViewChild('map', { static: true }) mapElement: ElementRef;
+ 
     searchShopName:string = "";
-
     shops:Shop[];
     selectedShop:Shop;
     selectedShops:Shop[];
@@ -21,25 +22,31 @@ export class HomePage implements OnInit{
     latitude: number = 35.651509516118466;
     longitude: number = 140.03762950048184;
 
-  constructor() {
-    this.shops = [
-      {id:1,latitude:35.651509516118466,longitude:140.03762950048184,name:"イオンタワー",address:"千葉県千葉市美浜区中瀬1丁目5番地1",tel:"0432126110"},
-      {id:2,latitude:35.65036272477391,longitude:140.04009889994245,name:"イオンタワーアネックス",address:"千葉県千葉市美浜区中瀬1丁目4",tel:"0432126003"},
-      {id:3,latitude:35.654971926994044,longitude:140.0293380306287,name:"イオンモール幕張新都心",address:"千葉県千葉市美浜区中瀬一丁目5番地1",tel:"0433517500"},
-      {id:4,latitude:35.68757955674779,longitude: 139.7183371330307,name:"まいばすけっと四谷4丁目",address:"東京都新宿区四谷４丁目1−１ 細井ビル",tel:"0353623908"},
-      {id:5,latitude:35.671990,longitude:140.040341,name:"ミニストップ メイプルイン幕張",address:"千葉県千葉市花見川区幕張本郷１丁目１２−１",tel:"0432760602"},
-      {id:6,latitude:35.652048,longitude:140.049376,name:"イオン幕張",address:"〒261-0021 千葉県千葉市美浜区ひび野１−３",tel:"0433505511"},     
-    ]
+    constructor(private locationService:LocationService) {
+
   }
 
-  ngOnInit(){
-      this.loadMap();
-  }
+  async ngOnInit(){
+      this.locationService.getLocation(this.latitude, this.longitude).subscribe((res:any) => {
+        this.shops = res.data;
+        this.loadMap();
+      });
+      
+    }
 
   async getLocation() {
-      const position = await Geolocation.getCurrentPosition();
-      this.latitude = position.coords.latitude;
-      this.longitude =position.coords.longitude;
+      await Geolocation.getCurrentPosition()
+        .then((resp) => {
+            this.latitude = resp.coords.latitude;
+            this.longitude = resp.coords.longitude;
+        })
+        .catch((error) => {
+            console.log('Error getting location',error);
+        });
+
+      this.locationService.getLocation(this.latitude,this.longitude).subscribe((res:any) => {
+        this.shops = res.data;
+      });
   }
 
   async loadMap() {
@@ -104,31 +111,17 @@ export class HomePage implements OnInit{
   search(searchForm){
       //初期化
       this.selectedShops = [];
-      var cnt = 0;
-      for (let i = 0; i < this.shops.length; i++) {
-          var string = this.shops[i].name;
-          var pattern = searchForm.value.searchShopName;
-          if(string.indexOf(pattern) > -1){
 
-              if(cnt === 0 ){
-                  this.latitude = this.shops[i].latitude;
-                  this.longitude = this.shops[i].longitude;
-                  this.loadMap();
-              }
+      var name =searchForm.value.searchShopName;
+      this.locationService.getLocationName(name).subscribe((res:any) => {
+          this.selectedShops = res.data;
+          this.shops = res.data;
+          this.latitude = this.selectedShops[0].latitude;
+          this.longitude = this.selectedShops[0].longitude;
+          this.loadMap();
+      
+      });
 
-              //一致したら配列に入れる
-              this.selectedShops[cnt] = {
-                id:this.shops[i].id,
-                name:this.shops[i].name,
-                address:this.shops[i].address,
-                tel:this.shops[i].tel,
-                latitude:this.shops[i].latitude,
-                longitude:this.shops[i].longitude
-              };
-              cnt++;
-          }
-      }
-      console.log(this.selectedShops);
   }
 }
 class Shop{
